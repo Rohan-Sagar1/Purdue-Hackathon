@@ -31,4 +31,3 @@ contract ERC20Mint {
         emit Transfer(msg.sender, to, value);
     }
 }
-
