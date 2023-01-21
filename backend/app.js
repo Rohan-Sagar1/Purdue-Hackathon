@@ -1,52 +1,89 @@
 const { Pool } = require("pg");
 const { v4: uuidv4 } = require("uuid");
+// const { https } = require("http");
+const express = require("express");
+const {max} = require("pg/lib/defaults");
+const app = express();
 require("dotenv").config();
 
-// Taken from https://github.com/cockroachlabs/example-app-node-postgres:w
+const db = require("./database/database.js");
 
-async function retryTxn(n, max, client, operation, callback) {
-    const backoffInterval = 100; // millis
-    const maxTries = 5;
-    let tries = 0;
 
-    while (true) {
-        await client.query('BEGIN;');
+app.use(express.json()); // need this for express to parse incoming data as json
+app.use(express.static(__dirname + '/html'));
+app.use(express.static(__dirname + '/assets'));
 
-        tries++;
 
-        try {
-            const result = await operation(client, callback);
-            await client.query('COMMIT;');
-            return result;
-        } catch (err) {
-            await client.query('ROLLBACK;');
+// initialize vars
+// TODO: access these only when needed
+const PORT = process.env.SERVER_PORT;
+const HOST = process.env.SERVER_HOST;
+const DB_URL = process.env.DATABASE_URL;
 
-            if (err.code !== '40001' || tries === maxTries) {
-                throw err;
-            } else {
-                console.log('Transaction failed. Retrying.');
-                console.log(err.message);
-                await new Promise(r => setTimeout(r, tries * backoffInterval));
-            }
+async function writeSql() {
+    let client = await db.getClient(DB_URL);
+
+    // Callback function; taken from:
+    // https://github.com/cockroachlabs/example-app-node-postgres
+    function cb(err, res) {
+        if (err) throw err;
+
+        if (res.rows.length > 0) {
+            console.log("New account balances:");
+            res.rows.forEach((row) => {
+                console.log(row);
+            });
         }
     }
+
+    console.log("testing sql...");
+    await db.retryTxn(0, 15, client, db.addAccount, cb);
+    console.log("done");
 }
 
+async function getSql() {
+    let client = await db.getClient(DB_URL);
 
+    // Callback function; taken from:
+    // https://github.com/cockroachlabs/example-app-node-postgres
+    function cb(err, res) {
+        if (err) throw err;
 
-let getClient = async function() {
-    const connectionString = process.env.DATABASE_URL;
-    const pool = new Pool({
-        connectionString,
-        application_name: "$ docs_simplecrud_node-postgres",
-    });
+        if (res.rows.length > 0) {
+            console.log("New account balances:");
+            res.rows.forEach((row) => {
+                console.log(row);
+            });
+        }
+    }
 
-    return await pool.connect();
-};
+    console.log("getting sql...");
+    await db.doTransaction(client, cb, db.getAccounts, 5);
+    console.log("done");
+
+}
+
+app.get('/', async (req, res) => {
+    const error = req.query.error;
+    const code = req.query.code;
+    const state = req.query.state;
+
+    await getSql();
+
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+            <body>
+            yeye
+            </body>
+        </html>
+    `);
+});
+
+app.listen(PORT, () =>
+    console.log(`HTTP Server is up. Now go to ${HOST}:${PORT}`)
+);
 
 (async () => {
-    let client = getClient();
-
-
 
 })();

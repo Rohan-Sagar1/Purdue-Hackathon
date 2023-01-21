@@ -2,6 +2,8 @@
   "dependencies": {
     "child-process": "latest",
     "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "nodejs": "^0.0.0",
     "pg": "latest",
     "pg-connection-string": "latest",
     "prompt": "latest",
