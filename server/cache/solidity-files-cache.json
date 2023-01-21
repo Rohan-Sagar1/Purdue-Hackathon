@@ -2,7 +2,7 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/rohansagar/Documents/GitHub/Purdue-Hackathon/server/contracts/ERC20Mint.sol": {
-      "lastModificationDate": 1674281085861,
+      "lastModificationDate": 1674284623480,
       "contentHash": "a65a7f192fbc3c292e93ee96ad5a9841",
       "sourceName": "contracts/ERC20Mint.sol",
       "solcConfig": {
@@ -37,8 +37,8 @@
       ]
     },
     "/Users/rohansagar/Documents/GitHub/Purdue-Hackathon/server/contracts/SyntheticAssetMarket.sol": {
-      "lastModificationDate": 1674281277902,
-      "contentHash": "882c1067f1378547fdd0f677294b10c0",
+      "lastModificationDate": 1674306335182,
+      "contentHash": "d14215a37893507bf485c60b7f6052dd",
       "sourceName": "contracts/SyntheticAssetMarket.sol",
       "solcConfig": {
         "version": "0.8.17",

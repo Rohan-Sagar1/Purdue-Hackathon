@@ -1,53 +1,139 @@
+// const { expect } = require("chai");
+// const { ethers } = require("hardhat");
+// const { BigNumber } = require("ethers");
+
+// describe("SyntheticAsset", () => {
+//   let syntheticAsset;
+//   let owner;
+
+//   beforeEach(async () => {
+//     accounts = await ethers.provider.listAccounts();
+//     const syntheticAssetFactory = await ethers.getContractFactory("SyntheticAssetMarket");
+//     syntheticAsset = await syntheticAssetFactory.deploy();
+//     await syntheticAsset.deployed();
+
+//     const signers = await ethers.getSigners();
+//     owner = await signers[0].getAddress();
+//   });
+
+//   it("should allow to create a synthetic asset", async () => {
+//     await syntheticAsset.createSyntheticAsset(
+//       "Test Synthetic Asset",
+//       "TSA",
+//       18,
+//       100,
+//       10,
+//       2
+//     );
+//     const syntheticAssets = await syntheticAsset.getSyntheticAssets();
+//     expect(syntheticAssets.length).to.equal(1);
+//     expect(await syntheticAsset.balanceOf(owner)).to.equal(100);
+//     expect(await syntheticAsset.name()).to.equal("Test Synthetic Asset");
+//     expect(await syntheticAsset.symbol()).to.equal("TSA");
+//     expect(await syntheticAsset.decimals()).to.equal(18);
+//     const [price, weight] = await syntheticAsset.getSyntheticAssetDetail(syntheticAssets[0]);
+//     expect(price).to.equal(10);
+//     expect(weight).to.equal(2);
+//   });
+
+//   it("should allow to trade synthetic asset", async () => {
+//     await syntheticAsset.createSyntheticAsset(
+//       "Test Synthetic Asset",
+//       "TSA",
+//       18,
+//       100,
+//       10,
+//       2
+//     );
+//     await syntheticAsset.tradeSyntheticAsset(owner, 50);
+//     expect(await syntheticAsset.balanceOf(owner)).to.equal(50);
+//     const [price, weight] = await syntheticAsset.getSyntheticAssetDetail(owner);
+//     expect(price).to.equal(10);
+//     expect(weight).to.equal(2);
+//   });
+
+//   it("should mint ERC20Mint", async () => {
+//     const tx = await erc20Mint.mint(owner, BigNumber.from(1000000));
+//     const balance = await erc20Mint.balanceOf(owner);
+//     expect(balance).to.equal(BigNumber.from(1000000));
+//   });
+
+// });
+
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { BigNumber } = require("ethers");
-const { deployments } = require("hardhat");
 
 describe("SyntheticAssetMarket", () => {
-    let syntheticAssetMarket;
-    let underlyingAssets;
-    let weights;
-    let owner;
-    let erc20Mint;
+  let syntheticAssetMarket;
+  let owner;
 
-    beforeEach(async () => {
-        const syntheticAssetMarketFactory = await ethers.getContractFactory("SyntheticAssetMarket");
-        syntheticAssetMarket = await syntheticAssetMarketFactory.deploy();
-        await syntheticAssetMarket.deployed();
+beforeEach(async () => {
+  accounts = await ethers.provider.listAccounts();
+  const syntheticAssetMarketFactory = await ethers.getContractFactory("SyntheticAssetMarket");
+  syntheticAssetMarket = await syntheticAssetMarketFactory.deploy();
+  await syntheticAssetMarket.deployed();
 
-        const ERC20MintFactory = await ethers.getContractFactory("ERC20Mint");
-        erc20Mint = await ERC20MintFactory.deploy();
-        await erc20Mint.deployed();
+  const ERC20MintFactory = await ethers.getContractFactory("ERC20Mint");
+  erc20Mint = await ERC20MintFactory.deploy();
+  await erc20Mint.deployed();
 
-        const signers = await ethers.getSigners();
-        owner = await signers[0].getAddress();
-        underlyingAssets = [erc20Mint.address, erc20Mint.address];
-        weights = [BigNumber.from(1), BigNumber.from(2)];
-
-        await syntheticAssetMarket.addAsset(erc20Mint.address, BigNumber.from(1));
-    });
-
-
-    it("should create a synthetic asset", async () => {
-        const tx = await syntheticAssetMarket.createSyntheticAsset(underlyingAssets, weights);
-        const syntheticAssetAddress = tx.events[0].args[1];
-        expect(syntheticAssetAddress).to.not.be.null;
-
-        const syntheticAssetInfo = await syntheticAssetMarket.getSyntheticAsset(syntheticAssetAddress);
-        expect(syntheticAssetInfo.underlyingAssets).to.deep.equal(underlyingAssets);
-        expect(syntheticAssetInfo.weights).to.deep.equal(weights);
-    });
-
-    it("should trade synthetic assets", async () => {
-        const tx = await syntheticAssetMarket.createSyntheticAsset(underlyingAssets, weights);
-        const syntheticAssetAddress = tx.events[0].args[1];
-        expect(syntheticAssetAddress).to.not.be.null; 
-
-        const newOwner = await ethers.getSigners()[1].getAddress();
-        const tx2 = await syntheticAssetMarket.tradeSyntheticAsset(syntheticAssetAddress, newOwner, bigNumberify(1));
-        const syntheticAssetInfo = await syntheticAssetMarket.getSyntheticAsset(syntheticAssetAddress);
-        expect(syntheticAssetInfo.owner).to.equal(newOwner);
-    });
+  const signers = await ethers.getSigners();
+  owner = await signers[0].getAddress();
 });
 
+it("should allow to create a synthetic asset", async () => {
+  await syntheticAssetMarket.createSyntheticAsset(
+    "Test Synthetic Asset",
+    "TSA",
+    18,
+    100,
+    10,
+    2
+    );
+  const syntheticAssets = await syntheticAssetMarket.getSyntheticAssets();
+  expect(syntheticAssets.length).to.equal(1);
+  expect(await syntheticAssetMarket.balanceOf(owner)).to.equal(100);
+  expect(await syntheticAssetMarket.name()).to.equal("Test Synthetic Asset");
+  expect(await syntheticAssetMarket.symbol()).to.equal("TSA");
+  expect(await syntheticAssetMarket.decimals()).to.equal(18);
+  const [price, weight] = await syntheticAssetMarket.getSyntheticAssetDetail(syntheticAssets[0]);
+  expect(price).to.equal(10);
+  expect(weight).to.equal(2);
+  });
+
+  it("should allow to trade synthetic asset", async () => {
+    await syntheticAssetMarket.createSyntheticAsset(
+      "Test Synthetic Asset",
+      "TSA",
+      18,
+      100,
+      10,
+      2
+      );
+    const recipient = accounts[1];
+    await syntheticAssetMarket.trade(owner, recipient, 50);
+    expect(await syntheticAssetMarket.balanceOf(owner)).to.equal(50);
+    expect(await syntheticAssetMarket.balanceOf(recipient)).to.equal(50);
+    const [price, weight] = await syntheticAssetMarket.getSyntheticAssetDetail(owner);
+    expect(price).to.equal(10);
+    expect(weight).to.equal(2);
+    });
+  
+  
+
+
+  it("should mint ERC20Mint", async () => {
+    const tx = await erc20Mint.mint(owner, BigNumber.from(1000000));
+    const balance = await erc20Mint.balanceOf(owner);
+    expect(balance).to.equal(BigNumber.from(1000000));
+  });
+
+});
+  
+  
+
+
+
+     
 
